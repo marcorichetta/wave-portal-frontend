@@ -1,6 +1,6 @@
 # Wave Portal Frontend 👋
 
-React app para consumir el smart contract de acá.
+React app para consumir el smart contract de [acá](https://github.com/marcorichetta/wave-portal).
 
 ## Setup
 
