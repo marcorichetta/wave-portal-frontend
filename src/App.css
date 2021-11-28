@@ -32,3 +32,14 @@
   border-radius: 5px;
   
 }
+
+.video {
+    margin-top: 16px
+}
+
+.loaderText {
+  text-align: center;
+    margin-top: 10px;
+  font-size: 24px;
+  font-weight: 600;
+}
