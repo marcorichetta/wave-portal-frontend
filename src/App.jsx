@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import "./App.css";
 import { abi } from "./utils/WavePortal.json";
@@ -6,12 +6,14 @@ import { Loader } from "./Loader";
 
 
 export default function App() {
-	const [currentAccount, setCurrentAccount] = React.useState("");
-	const [isMining, setIsMining] = React.useState(false);
 
+    // App state
+	const [currentAccount, setCurrentAccount] = useState("");
+	const [isMining, setIsMining] = useState(false);
+    const [allWaves, setAllWaves] = useState([])
     
-    // App variables
-	const contractAdress = "0x4E4810355E41b0883f033098f2bb7482021359B2";
+    // App constants
+	const contractAdress = "0xFfEA76e6a1b442Fc6883Ef8222Af22fC5619408A";
 	const contractABI = abi;
 
     /**
@@ -47,14 +49,19 @@ export default function App() {
 			} else {
 				console.log("No se encontró una cuenta autorizada");
 			}
+
+            const waves = await getAllWaves()
+
+            setAllWaves(waves);
+
 		} catch (error) {
 			console.log(error);
 		}
 	};
 
-    React.useEffect(() => {
+    useEffect(() => {
 		checkIfWalletIsConnected();
-	}, );
+	}, []);
 
 	const connectWallet = async () => {
 		try {
@@ -103,6 +110,32 @@ export default function App() {
 		}
 	};
 
+    const getAllWaves = async () => {
+        try {
+            const ethereum = getMetamaskProvider()
+            
+            const provider = new ethers.providers.Web3Provider(ethereum)
+            const signer = provider.getSigner()
+
+            const wavePortalContract = new ethers.Contract(contractAdress, contractABI, signer)
+
+            const waves = await wavePortalContract.getAllWaves()
+
+            console.log(`Se encontraron ${waves.length} saludos`);
+            
+            const cleanedWaves = waves.map(wave => (
+                {
+                    address: wave.waver,
+                    timestamp: new Date(wave.timestamp * 1000),
+                    message: wave.message 
+                }
+            ))
+            
+            return cleanedWaves
+        } catch (error) {
+            console.log(error);
+        }
+    }
 	return (
 		<div className="mainContainer">
 			<div className="dataContainer">
@@ -137,6 +170,16 @@ export default function App() {
 						Conecta tu Wallet
 					</button>
 				)}
+
+                {allWaves.map((wave, index) => {
+                    return (
+                        <div key={index} style={{ backgroundColor: "OldLace", marginTop: "16px", padding: "8px"}}>
+                            <div>Address: {wave.address}</div>
+                            <div>Hora: {wave.timestamp.toString()}</div>
+                            <div>Mensaje: {wave.message}</div>
+                        </div>
+                    )
+                })}
 
 				{isMining ? <Loader /> : null}
 
